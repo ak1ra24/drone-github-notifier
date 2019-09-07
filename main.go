@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 
 	"github.com/ak1ra24/drone-github-notifier/githubapi"
 	"golang.org/x/crypto/ssh/terminal"
@@ -33,9 +34,10 @@ Options\n`, os.Args[0], os.Args[0])
 	} else {
 		b, _ := ioutil.ReadAll(os.Stdin)
 		fmt.Println("パイプで渡された内容(FD値0以外):", string(b))
-		drone_pr_num := os.Getenv("DRONE_PULL_REQUEST")
-		if len(drone_pr_num) != 0 {
-			config.PRComment(1, string(b))
+		drone_pr := os.Getenv("DRONE_PULL_REQUEST")
+		if len(drone_pr) != 0 {
+			drone_pr_num, _ := strconv.Atoi(drone_pr)
+			config.PRComment(drone_pr_num, string(b))
 		} else {
 			fmt.Errorf("Not Setting DRONE_PULL_REQUEST")
 		}
