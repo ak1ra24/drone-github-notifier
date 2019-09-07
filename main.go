@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ak1ra24/gogithub/githubapi"
+	"github.com/ak1ra24/drone-github-notifier/githubapi"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
