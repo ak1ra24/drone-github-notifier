@@ -28,12 +28,11 @@ Options\n`, os.Args[0], os.Args[0])
 	flag.Parse()
 
 	config := githubapi.NewClient(*owner, *repo)
-	fmt.Println(terminal.IsTerminal(0))
 	if terminal.IsTerminal(0) {
 		fmt.Println("パイプ無し(FD値0)")
 	} else {
 		b, _ := ioutil.ReadAll(os.Stdin)
-		fmt.Println("パイプで渡された内容(FD値0以外):", string(b))
+		fmt.Println("パイプで渡された内容:", string(b))
 		drone_pr := os.Getenv("DRONE_PULL_REQUEST")
 		if len(drone_pr) != 0 {
 			drone_pr_num, _ := strconv.Atoi(drone_pr)
