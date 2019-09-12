@@ -17,7 +17,7 @@ type Github struct {
 }
 
 func NewClient(owner, repo string) *Github {
-	token := os.Getenv("GITHUB_AUTH_TOKEN")
+	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
 		log.Fatal("Unauthorized: No token present")
 	}
