@@ -2,22 +2,28 @@ package githubapi
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
+	"github.com/ak1ra24/drone-github-notifier/ci"
 	"github.com/google/go-github/v28/github"
 	"golang.org/x/oauth2"
 )
 
 type Github struct {
 	Client *github.Client
+	Token  string
 	Owner  string
 	Repo   string
+	PR     ci.PullRequest
 }
 
-func NewClient(owner, repo string) *Github {
-	token := os.Getenv("GITHUB_TOKEN")
+func NewClient(owner, repo, gtoken string, pr ci.PullRequest) *Github {
+	gtoken = strings.TrimLeft(gtoken, "$")
+	token := os.Getenv(gtoken)
 	if token == "" {
 		log.Fatal("Unauthorized: No token present")
 	}
@@ -26,7 +32,7 @@ func NewClient(owner, repo string) *Github {
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	config := &Github{Client: client, Owner: owner, Repo: repo}
+	config := &Github{Client: client, Owner: owner, Repo: repo, Token: token, PR: pr}
 
 	return config
 }
@@ -60,17 +66,6 @@ func (g *Github) GetPR() {
 	}
 }
 
-func (g *Github) PRComment(number int, body string) error {
-
-	comment := &github.IssueComment{Body: &body}
-	_, _, err := g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, number, comment)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (g *Github) CreateIssue(title, body string, labels []string) error {
 	issreq := &github.IssueRequest{Title: &title, Body: &body, Labels: &labels}
 	_, _, err := g.Client.Issues.Create(context.Background(), g.Owner, g.Repo, issreq)
@@ -78,4 +73,61 @@ func (g *Github) CreateIssue(title, body string, labels []string) error {
 		return err
 	}
 	return nil
+}
+
+func (g *Github) PRComment(body string) error {
+
+	fmt.Println(g.Owner, g.Repo, g.PR.Number)
+	if g.PR.Number != 0 {
+		fmt.Println(g.PR.Number)
+		_, _, err := g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Number, &github.IssueComment{Body: &body})
+		if err != nil {
+			return err
+		}
+	}
+	if g.PR.Reversion != "" {
+		commits, err := g.List(g.PR.Reversion)
+		if err != nil {
+			return err
+		}
+		lastRevision, _ := g.lastOne(commits, g.PR.Reversion)
+		g.PR.Reversion = lastRevision
+		_, _, err = g.Client.Repositories.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Reversion, &github.RepositoryComment{Body: &body})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (g *Github) List(revision string) ([]string, error) {
+	if revision == "" {
+		return []string{}, errors.New("no revision specified")
+	}
+	var s []string
+	commits, _, err := g.Client.Repositories.ListCommits(context.Background(), g.Owner, g.Repo, &github.CommitsListOptions{SHA: revision})
+	if err != nil {
+		return s, err
+	}
+	for _, commit := range commits {
+		s = append(s, *commit.SHA)
+	}
+	return s, nil
+}
+
+// Last returns the hash of the previous commit of the given commit
+func (g *Github) lastOne(commits []string, revision string) (string, error) {
+	if revision == "" {
+		return "", errors.New("no revision specified")
+	}
+	if len(commits) == 0 {
+		return "", errors.New("no commits")
+	}
+	// e.g.
+	// a0ce5bf 2018/04/05 20:50:01 (HEAD -> master, origin/master)
+	// 5166cfc 2018/04/05 20:40:12
+	// 74c4d6e 2018/04/05 20:34:31
+	// 9260c54 2018/04/05 20:16:20
+	return commits[1], nil
 }
