@@ -81,6 +81,7 @@ func (g *Github) PRComment(body string) error {
 	if g.PR.Number != 0 {
 		fmt.Println("In PR NUMBER")
 		_, _, err := g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Number, &github.IssueComment{Body: &body})
+		_, _, err = g.Client.Repositories.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Reversion, &github.RepositoryComment{Body: &body})
 		if err != nil {
 			return err
 		}
