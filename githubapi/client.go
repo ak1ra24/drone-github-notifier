@@ -77,14 +77,16 @@ func (g *Github) CreateIssue(title, body string, labels []string) error {
 
 func (g *Github) PRComment(body string) error {
 
-	fmt.Println(g.Owner, g.Repo, g.PR.Number, g.PR.Reversion)
+	fmt.Println("CHECK: ", g.Owner, g.Repo, g.PR.Number, g.PR.Reversion)
 	if g.PR.Number != 0 {
+		fmt.Println("In PR NUMBER")
 		_, _, err := g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Number, &github.IssueComment{Body: &body})
 		if err != nil {
 			return err
 		}
 	}
 	if g.PR.Reversion != "" {
+		fmt.Println("In Revision")
 		prs, err := g.GetPRs()
 		if err != nil {
 			return err
