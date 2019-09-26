@@ -79,13 +79,23 @@ func (g *Github) PRComment(body string) error {
 
 	fmt.Println(g.Owner, g.Repo, g.PR.Number, g.PR.Reversion)
 	if g.PR.Number != 0 {
-		fmt.Println(g.PR.Number)
 		_, _, err := g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Number, &github.IssueComment{Body: &body})
 		if err != nil {
 			return err
 		}
 	}
 	if g.PR.Reversion != "" {
+		prs, err := g.GetPRs()
+		if err != nil {
+			return err
+		}
+		fmt.Println("+++++++++++++++++++++++++++++++++++++++++++")
+		fmt.Println(prs)
+		fmt.Println("+++++++++++++++++++++++++++++++++++++++++++")
+		for _, pr := range prs {
+			fmt.Println(pr)
+			fmt.Println(pr.Number, pr.Title)
+		}
 		commits, err := g.List(g.PR.Reversion)
 		if err != nil {
 			return err
@@ -99,6 +109,11 @@ func (g *Github) PRComment(body string) error {
 	}
 
 	return nil
+}
+
+func (g *Github) GetPRs() ([]*github.PullRequest, error) {
+	prs, _, err := g.Client.PullRequests.ListPullRequestsWithCommit(context.Background(), g.Owner, g.Repo, g.PR.Reversion, &github.PullRequestListOptions{})
+	return prs, err
 }
 
 func (g *Github) List(revision string) ([]string, error) {
