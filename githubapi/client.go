@@ -97,8 +97,9 @@ func (g *Github) PRComment(body string) error {
 		fmt.Println("+++++++++++++++++++++++++++++++++++++++++++")
 		for _, pr := range prs {
 			fmt.Println(pr)
-			fmt.Println(pr.Number, pr.Title)
+			fmt.Println(&pr.Number, &pr.Title)
 		}
+
 		commits, err := g.List(g.PR.Reversion)
 		if err != nil {
 			return err
