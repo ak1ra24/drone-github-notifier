@@ -95,10 +95,9 @@ func (g *Github) PRComment(body string) error {
 		fmt.Println("+++++++++++++++++++++++++++++++++++++++++++")
 		fmt.Println(prs)
 		fmt.Println("+++++++++++++++++++++++++++++++++++++++++++")
-		for _, pr := range prs {
-			fmt.Println(*pr)
-			fmt.Println(*pr.Number, *pr.Title)
-		}
+		lastprNumber := *prs[0].Number
+		g.PR.Number = lastprNumber
+		_, _, err = g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Number, &github.IssueComment{Body: &body})
 
 		commits, err := g.List(g.PR.Reversion)
 		if err != nil {
