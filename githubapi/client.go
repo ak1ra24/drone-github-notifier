@@ -85,27 +85,28 @@ func (g *Github) PRComment(body string) error {
 		if err != nil {
 			return err
 		}
-	}
-	if g.PR.Reversion != "" {
-		fmt.Println("In Revision")
-		prs, err := g.GetPRs()
-		if err != nil {
-			return err
-		}
+	} else {
+		if g.PR.Reversion != "" {
+			fmt.Println("In Revision")
+			prs, err := g.GetPRs()
+			if err != nil {
+				return err
+			}
 
-		lastprNumber := *prs[0].Number
-		g.PR.Number = lastprNumber
-		_, _, err = g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Number, &github.IssueComment{Body: &body})
+			lastprNumber := *prs[0].Number
+			g.PR.Number = lastprNumber
+			_, _, err = g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Number, &github.IssueComment{Body: &body})
 
-		commits, err := g.List(g.PR.Reversion)
-		if err != nil {
-			return err
-		}
-		lastRevision, _ := g.lastOne(commits, g.PR.Reversion)
-		g.PR.Reversion = lastRevision
-		_, _, err = g.Client.Repositories.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Reversion, &github.RepositoryComment{Body: &body})
-		if err != nil {
-			return err
+			commits, err := g.List(g.PR.Reversion)
+			if err != nil {
+				return err
+			}
+			lastRevision, _ := g.lastOne(commits, g.PR.Reversion)
+			g.PR.Reversion = lastRevision
+			_, _, err = g.Client.Repositories.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Reversion, &github.RepositoryComment{Body: &body})
+			if err != nil {
+				return err
+			}
 		}
 	}
 
