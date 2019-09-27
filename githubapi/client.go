@@ -92,9 +92,7 @@ func (g *Github) PRComment(body string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("+++++++++++++++++++++++++++++++++++++++++++")
-		fmt.Println(prs)
-		fmt.Println("+++++++++++++++++++++++++++++++++++++++++++")
+
 		lastprNumber := *prs[0].Number
 		g.PR.Number = lastprNumber
 		_, _, err = g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Number, &github.IssueComment{Body: &body})
@@ -134,7 +132,6 @@ func (g *Github) List(revision string) ([]string, error) {
 	return s, nil
 }
 
-// Last returns the hash of the previous commit of the given commit
 func (g *Github) lastOne(commits []string, revision string) (string, error) {
 	if revision == "" {
 		return "", errors.New("no revision specified")
@@ -142,10 +139,5 @@ func (g *Github) lastOne(commits []string, revision string) (string, error) {
 	if len(commits) == 0 {
 		return "", errors.New("no commits")
 	}
-	// e.g.
-	// a0ce5bf 2018/04/05 20:50:01 (HEAD -> master, origin/master)
-	// 5166cfc 2018/04/05 20:40:12
-	// 74c4d6e 2018/04/05 20:34:31
-	// 9260c54 2018/04/05 20:16:20
 	return commits[1], nil
 }
