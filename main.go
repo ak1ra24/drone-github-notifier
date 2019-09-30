@@ -81,6 +81,10 @@ func main() {
 			if err := client.PRComment(string(b)); err != nil {
 				panic(err)
 			}
+		} else if ciservice.Event == "push" && ciservice.Branch == "master" {
+			if err := client.PRComment(string(b)); err != nil {
+				panic(err)
+			}
 		}
 	}
 }

@@ -6,9 +6,10 @@ import (
 )
 
 type CiService struct {
-	PR    PullRequest
-	URL   string
-	Event string
+	PR     PullRequest
+	URL    string
+	Event  string
+	Branch string
 }
 
 type PullRequest struct {
@@ -22,6 +23,7 @@ func Drone() (ci CiService, err error) {
 	ci.PR.Reversion = os.Getenv("DRONE_COMMIT_SHA")
 	ci.URL = os.Getenv("DRONE_BUILD_LINK")
 	ci.Event = os.Getenv("DRONE_BUILD_EVENT")
+	ci.Branch = os.Getenv("DRONE_BRANCH")
 	pr := os.Getenv("DRONE_PULL_REQUEST")
 	if pr == "" {
 		return ci, err
