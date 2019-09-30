@@ -93,9 +93,11 @@ func (g *Github) PRComment(body string) error {
 				return err
 			}
 
-			lastprNumber := *prs[0].Number
-			g.PR.Number = lastprNumber
-			_, _, err = g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Number, &github.IssueComment{Body: &body})
+			if len(prs) > 0 {
+				lastprNumber := *prs[0].Number
+				g.PR.Number = lastprNumber
+				_, _, err = g.Client.Issues.CreateComment(context.Background(), g.Owner, g.Repo, g.PR.Number, &github.IssueComment{Body: &body})
+			}
 
 			commits, err := g.List(g.PR.Reversion)
 			if err != nil {
