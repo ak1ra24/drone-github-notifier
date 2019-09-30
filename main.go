@@ -68,16 +68,16 @@ func main() {
 		fmt.Errorf("Not Support")
 	}
 
-	if ciservice.Event == "pull_request" {
-		pr := ciservice.PR
-		fmt.Println(pr)
+	pr := ciservice.PR
+	fmt.Println(pr)
 
-		client := githubapi.NewClient(github_settings.Repository.Owner, github_settings.Repository.Repo, github_settings.Token, pr)
-		if terminal.IsTerminal(0) {
-			fmt.Println("パイプ無し")
-		} else {
-			b, _ := ioutil.ReadAll(os.Stdin)
-			fmt.Println("パイプで渡された内容:", string(b))
+	client := githubapi.NewClient(github_settings.Repository.Owner, github_settings.Repository.Repo, github_settings.Token, pr)
+	if terminal.IsTerminal(0) {
+		fmt.Println("パイプ無し")
+	} else {
+		b, _ := ioutil.ReadAll(os.Stdin)
+		fmt.Println("パイプで渡された内容:", string(b))
+		if ciservice.Event == "pull_request" {
 			if err := client.PRComment(string(b)); err != nil {
 				panic(err)
 			}
